@@ -1,5 +1,11 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
-import { Link, Stack, useNavigation, usePathname } from "expo-router";
+import {
+  Link,
+  Stack,
+  useNavigation,
+  usePathname,
+  useRouter,
+} from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState, useContext, useLayoutEffect } from "react";
 import { ScrollView, TextInput } from "react-native-gesture-handler";
@@ -15,6 +21,8 @@ const dailyinput = () => {
   const { theme, setTheme } = useContext(ThemeContext);
   const styles = styling(theme);
 
+  const router = useRouter();
+
   const [mood, setMood] = useState("");
 
   const [firstGratitude, setFirstGratitude] = useState("");
@@ -28,7 +36,9 @@ const dailyinput = () => {
   const storeData = async () => {
     if (mood && firstGratitude) {
       try {
-        const id = new Date().toISOString();
+        const date = new Date();
+
+        const id = date.toISOString();
 
         const data = JSON.stringify({
           firstGratitude,
@@ -78,7 +88,12 @@ const dailyinput = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Stack.Screen options={{ title: "Daily Gratitude" }} />
+      <Stack.Screen
+        options={{
+          title: "Daily Gratitude",
+          animation: "slide_from_bottom",
+        }}
+      />
       <ScrollView contentContainerStyle={styles.container}>
         <View>
           <Text style={styles.text}>How has your day been?</Text>

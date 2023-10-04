@@ -12,7 +12,7 @@ Things to do!
 
 - theme selector
 
-- add ability to add photos
+- add ability to take photos
 
 - multi select and multi delete
 

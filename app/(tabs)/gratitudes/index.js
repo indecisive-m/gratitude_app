@@ -5,7 +5,7 @@ import {
   Text,
   StatusBar,
 } from "react-native";
-import { Stack, useNavigation, usePathname, useSegments } from "expo-router";
+import { Stack } from "expo-router";
 import { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -139,7 +139,7 @@ const index = () => {
       <Stack.Screen
         options={{
           title: "Daily Gratitude",
-          headerShown: false,
+          // headerShown: false,
         }}
       />
       <Header searchShown={searchShown} />

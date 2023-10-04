@@ -6,6 +6,6 @@ import { StatusBar } from "expo-status-bar";
 const Index = () => {
   NavigationBar.setBackgroundColorAsync(COLORS.dark.backgroundColor);
 
-  return <Redirect href="/gratitudes/" />;
+  return <Redirect href="/breathing/" />;
 };
 export default Index;

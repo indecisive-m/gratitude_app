@@ -1,21 +1,16 @@
 import { View, Text } from "react-native";
 import { Stack, Tabs } from "expo-router";
 import Toast from "react-native-toast-message";
-import COLORS from "../../../constants/COLORS";
-import { useNavigation } from "@react-navigation/native";
-import { useEffect } from "react";
 
-const GratitudeLayout = () => {
+const BreathingLayout = () => {
   return (
     <>
       <Stack
-        initialRouteName="gratitudes"
+        initialRouteName="breathing"
         screenOptions={{
           headerShown: false,
           animation: "none",
           // animationDuration: 500,
-          gestureEnabled: true,
-          gestureDirection: "vertical",
         }}
       />
       <Toast />
@@ -23,4 +18,4 @@ const GratitudeLayout = () => {
   );
 };
 
-export default GratitudeLayout;
+export default BreathingLayout;

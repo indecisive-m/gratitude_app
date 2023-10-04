@@ -132,7 +132,9 @@ const edit = () => {
 
   return (
     <View>
-      <Stack.Screen options={{ title: "Edit Gratitude" }} />
+      <Stack.Screen
+        options={{ title: "Edit Gratitude", animation: "slide_from_bottom" }}
+      />
       <ScrollView contentContainerStyle={styles.container}>
         <Pressable onPress={pickImage}>{showImage}</Pressable>
         <View>

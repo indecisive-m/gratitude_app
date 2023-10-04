@@ -4,8 +4,9 @@ import { ThemeContext } from "../../context/Contexts";
 // import { StatusBar } from "expo-status-bar";
 
 import COLORS from "../../constants/COLORS";
-import { useMemo, useState, useContext } from "react";
+import { useMemo, useState, useContext, useEffect } from "react";
 import { FontAwesome } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const HomeLayout = () => {
   const [theme, setTheme] = useState("dark");
@@ -25,8 +26,9 @@ const HomeLayout = () => {
           tabBarStyle: {
             backgroundColor: COLORS[theme].backgroundColor,
             borderTopWidth: 0,
-            display: hiddenPathNames.includes(pathname) ? "none" : "flex",
+            // display: hiddenPathNames.includes(pathname) ? "none" : "flex",
           },
+          tabBarHideOnKeyboard: true,
         }}
       >
         <Tabs.Screen
@@ -43,6 +45,8 @@ const HomeLayout = () => {
             ),
           }}
         />
+        <Tabs.Screen name="breathing" options={{ title: "Breathing" }} />
+
         <Tabs.Screen name="settings" options={{ title: "Settings" }} />
       </Tabs>
       <StatusBar
