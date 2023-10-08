@@ -18,7 +18,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Animated, { SlideInDown, Easing } from "react-native-reanimated";
 import { RefreshControl } from "react-native-gesture-handler";
 import { ThemeContext } from "../../../context/Contexts";
-import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 const index = () => {
   const [gratitude, setGratitude] = useState([]);
   const [selected, setSelected] = useState("");

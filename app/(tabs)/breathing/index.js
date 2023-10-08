@@ -4,11 +4,13 @@ import {
   Text,
   View,
   useWindowDimensions,
+  StatusBar,
 } from "react-native";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Stack } from "expo-router";
 import { ThemeContext } from "../../../context/Contexts";
 import Animated, {
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -20,13 +22,22 @@ import COLORS from "../../../constants/COLORS";
 
 const index = () => {
   const { theme, setTheme } = useContext(ThemeContext);
-  const { height, width } = useWindowDimensions();
+  const [height, setHeight] = useState(null);
+  const [width, setWidth] = useState(null);
+  const [text, setText] = useState("");
+
+  const onLayout = (e) => {
+    let { height, width } = e.nativeEvent.layout;
+    setHeight(height);
+    setWidth(width);
+  };
 
   const styles = styling(theme, height, width);
 
-  const opacity1 = useSharedValue(1);
-  const opacity2 = useSharedValue(1);
-  const opacity3 = useSharedValue(1);
+  const opacity1 = useSharedValue(0);
+  const opacity2 = useSharedValue(0);
+  const opacity3 = useSharedValue(0);
+  const opacity4 = useSharedValue(0);
 
   const ringOneAnimation = useAnimatedStyle(() => ({
     opacity: opacity1.value,
@@ -40,32 +51,74 @@ const index = () => {
     opacity: opacity3.value,
   }));
 
-  const handleAnimation = () => {
-    opacity3.value = withSequence(
-      withTiming(1, { duration: 1000 }),
-      withTiming(0, { duration: 1000 })
-    );
+  const ringFourAnimation = useAnimatedStyle(() => ({
+    opacity: opacity4.value,
+  }));
 
-    opacity2.value = withDelay(
-      2000,
-      withSequence(
-        withTiming(1, { duration: 1000 }),
-        withTiming(0, { duration: 1000 })
-      )
-    );
+  const breatheInAnimation = () => {
+    setText("Breathe In for 4 Seconds");
+
+    opacity4.value = withTiming(1, { duration: 1000 });
+
+    opacity3.value = withDelay(1000, withTiming(1, { duration: 1000 }));
+
+    opacity2.value = withDelay(2000, withTiming(1, { duration: 1000 }));
     opacity1.value = withDelay(
-      4000,
-      withSequence(
-        withTiming(1, { duration: 1000 }),
-        withTiming(0, { duration: 1000 })
-      )
+      3000,
+      withTiming(1, { duration: 1000 }, () => runOnJS(holdAnimation)())
     );
+  };
+
+  const holdAnimation = () => {
+    setText("Hold for 4 Seconds");
+    opacity4.value = withSequence(
+      withTiming(0.3, { duration: 2000 }),
+      withTiming(1, { duration: 2000 })
+    );
+    opacity3.value = withSequence(
+      withTiming(0.3, { duration: 2000 }),
+      withTiming(1, { duration: 2000 })
+    );
+    opacity2.value = withSequence(
+      withTiming(0.3, { duration: 2000 }),
+      withTiming(1, { duration: 2000 })
+    );
+    opacity1.value = withSequence(
+      withTiming(0.3, { duration: 2000 }),
+      withTiming(1, { duration: 2000 })
+    );
+    setTimeout(() => {
+      breatheOutAnimation();
+    }, 4000);
+  };
+
+  const breatheOutAnimation = () => {
+    setText("Breathe Out for 6 Seconds");
+    opacity1.value = withTiming(0, { duration: 1500 });
+    opacity2.value = withDelay(1500, withTiming(0, { duration: 1500 }));
+    opacity3.value = withDelay(3000, withTiming(0, { duration: 1500 }));
+    opacity4.value = withDelay(4500, withTiming(0, { duration: 1500 }));
+    setTimeout(() => {
+      setText("");
+    }, 6000);
+  };
+
+  const breathingAnimation = () => {
+    breatheInAnimation();
+
+    const breathing = setInterval(breatheInAnimation, 15000);
+
+    setTimeout(() => {
+      clearInterval(breathing);
+    }, 29000);
   };
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      <View style={styles.ringWrapper}>
+      <Text style={styles.text}>Breathing Exercises</Text>
+      <Text style={styles.breathingText}>{text}</Text>
+      <View style={styles.ringWrapper} onLayout={onLayout}>
         <Animated.View
           style={[styles.ringOne, styles.ring, ringOneAnimation]}
         ></Animated.View>
@@ -75,27 +128,45 @@ const index = () => {
         <Animated.View
           style={[styles.ringThree, styles.ring, ringThreeAnimation]}
         ></Animated.View>
+        <Animated.View
+          style={[styles.ringFour, styles.ring, ringFourAnimation]}
+        ></Animated.View>
       </View>
-      <Pressable onPress={handleAnimation}>
-        <Text style={{ color: "white" }}>Press</Text>
+      <Pressable onPress={breathingAnimation}>
+        <Text style={styles.button}>Press</Text>
       </Pressable>
+      <StatusBar
+        backgroundColor={COLORS[theme].backgroundColor}
+        barStyle={"light-content"}
+      />
     </View>
   );
 };
 
 export default index;
 
-const styling = (theme, height, w) =>
+const styling = (theme, height, width) =>
   StyleSheet.create({
     container: {
       backgroundColor: COLORS[theme].backgroundColor,
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
+      padding: 20,
     },
-    text: { color: COLORS[theme].primary },
+    text: {
+      color: COLORS[theme].primary,
+      fontSize: 24,
+    },
+    breathingText: {
+      color: COLORS[theme].primary,
+      fontSize: 18,
+      padding: 20,
+    },
     ringWrapper: {
       position: "relative",
+      flex: 1,
+      marginVertical: 10,
     },
     ring: {
       borderWidth: 5,
@@ -105,18 +176,39 @@ const styling = (theme, height, w) =>
       //   alignItems: "center",
     },
     ringOne: {
-      height: 300,
-      width: 300,
-      position: "relative",
+      position: "absolute",
+      height: 275,
+      width: 275,
+      top: height / 2 - 137.5,
+      left: width / 2 - 137.5,
     },
     ringTwo: {
       height: 200,
       width: 200,
       position: "absolute",
+      top: height / 2 - 100,
+      left: width / 2 - 100,
     },
     ringThree: {
-      height: 100,
-      width: 100,
+      height: 125,
+      width: 125,
       position: "absolute",
+      top: height / 2 - 62.5,
+      left: width / 2 - 62.5,
+    },
+    ringFour: {
+      height: 50,
+      width: 50,
+      position: "absolute",
+      top: height / 2 - 25,
+      left: width / 2 - 25,
+    },
+    button: {
+      color: COLORS[theme].primary,
+      fontSize: 16,
+      backgroundColor: COLORS[theme].medium,
+      paddingHorizontal: 30,
+      paddingVertical: 10,
+      borderRadius: 10,
     },
   });
