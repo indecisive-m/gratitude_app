@@ -110,6 +110,7 @@ const index = () => {
 
     setTimeout(() => {
       clearInterval(breathing);
+      router.replace("/breathing/");
     }, repetitions);
   };
 
