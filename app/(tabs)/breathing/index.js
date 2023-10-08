@@ -1,13 +1,6 @@
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-  StatusBar,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View, StatusBar } from "react-native";
 import { useContext, useState } from "react";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { ThemeContext } from "../../../context/Contexts";
 import Animated, {
   runOnJS,
@@ -16,15 +9,21 @@ import Animated, {
   withDelay,
   withSequence,
   withTiming,
+  cancelAnimation,
 } from "react-native-reanimated";
 
 import COLORS from "../../../constants/COLORS";
 
 const index = () => {
   const { theme, setTheme } = useContext(ThemeContext);
+  const [animationPlaying, setAnimationPlaying] = useState(false);
   const [height, setHeight] = useState(null);
   const [width, setWidth] = useState(null);
   const [text, setText] = useState("");
+  const [repetitions, setRepetitions] = useState(140000);
+  const [counter, setCounter] = useState(0);
+
+  const router = useRouter();
 
   const onLayout = (e) => {
     let { height, width } = e.nativeEvent.layout;
@@ -56,6 +55,9 @@ const index = () => {
   }));
 
   const breatheInAnimation = () => {
+    setAnimationPlaying(true);
+    setCounter((prev) => prev + 1);
+
     setText("Breathe In for 4 Seconds");
 
     opacity4.value = withTiming(1, { duration: 1000 });
@@ -63,6 +65,7 @@ const index = () => {
     opacity3.value = withDelay(1000, withTiming(1, { duration: 1000 }));
 
     opacity2.value = withDelay(2000, withTiming(1, { duration: 1000 }));
+
     opacity1.value = withDelay(
       3000,
       withTiming(1, { duration: 1000 }, () => runOnJS(holdAnimation)())
@@ -98,25 +101,36 @@ const index = () => {
     opacity2.value = withDelay(1500, withTiming(0, { duration: 1500 }));
     opacity3.value = withDelay(3000, withTiming(0, { duration: 1500 }));
     opacity4.value = withDelay(4500, withTiming(0, { duration: 1500 }));
-    setTimeout(() => {
-      setText("");
-    }, 6000);
   };
 
   const breathingAnimation = () => {
     breatheInAnimation();
 
-    const breathing = setInterval(breatheInAnimation, 15000);
+    const breathing = setInterval(breatheInAnimation, 14000);
 
     setTimeout(() => {
       clearInterval(breathing);
-    }, 29000);
+    }, repetitions);
   };
+
+  const stopAnimation = () => {
+    router.replace("/breathing/");
+  };
+
+  const button = !animationPlaying ? (
+    <Pressable onPress={breathingAnimation}>
+      <Text style={styles.button}>Start</Text>
+    </Pressable>
+  ) : (
+    <Pressable onPress={stopAnimation}>
+      <Text style={styles.button}>Stop</Text>
+    </Pressable>
+  );
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      <Text style={styles.text}>Breathing Exercises</Text>
+      <Text style={styles.text}>Deep Breathing</Text>
       <Text style={styles.breathingText}>{text}</Text>
       <View style={styles.ringWrapper} onLayout={onLayout}>
         <Animated.View
@@ -132,9 +146,8 @@ const index = () => {
           style={[styles.ringFour, styles.ring, ringFourAnimation]}
         ></Animated.View>
       </View>
-      <Pressable onPress={breathingAnimation}>
-        <Text style={styles.button}>Press</Text>
-      </Pressable>
+      {button}
+      <Text style={styles.text}>{`${counter} / 10`}</Text>
       <StatusBar
         backgroundColor={COLORS[theme].backgroundColor}
         barStyle={"light-content"}
@@ -171,7 +184,7 @@ const styling = (theme, height, width) =>
     ring: {
       borderWidth: 5,
       borderRadius: 1000,
-      borderColor: COLORS[theme].secondary,
+      borderColor: COLORS[theme].medium,
       //   justifyContent: "center",
       //   alignItems: "center",
     },
@@ -204,7 +217,7 @@ const styling = (theme, height, width) =>
       left: width / 2 - 25,
     },
     button: {
-      color: COLORS[theme].primary,
+      color: COLORS[theme].backgroundColor,
       fontSize: 16,
       backgroundColor: COLORS[theme].medium,
       paddingHorizontal: 30,

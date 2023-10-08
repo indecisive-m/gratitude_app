@@ -1,12 +1,11 @@
 import { Tabs, usePathname, useSegments } from "expo-router";
 import { StyleSheet, StatusBar } from "react-native";
 import { ThemeContext } from "../../context/Contexts";
-// import { StatusBar } from "expo-status-bar";
 
 import COLORS from "../../constants/COLORS";
-import { useMemo, useState, useContext, useEffect } from "react";
-import { FontAwesome } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useMemo, useState } from "react";
+import { Entypo } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 
 const HomeLayout = () => {
   const [theme, setTheme] = useState("dark");
@@ -21,33 +20,77 @@ const HomeLayout = () => {
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: COLORS[theme].medium,
+          tabBarActiveTintColor: COLORS[theme].backgroundColor,
           tabBarInactiveTintColor: COLORS[theme].secondary,
           tabBarStyle: {
             backgroundColor: COLORS[theme].backgroundColor,
             borderTopWidth: 0,
-            // display: hiddenPathNames.includes(pathname) ? "none" : "flex",
           },
           tabBarHideOnKeyboard: true,
+          tabBarActiveBackgroundColor: COLORS[theme].primary,
+          tabBarItemStyle: {
+            borderRadius: 5,
+          },
         }}
       >
         <Tabs.Screen
           name="gratitudes"
           options={{
-            title: "Daily Gratitude",
+            title: "Gratitudes",
             headerShown: false,
             tabBarIcon: ({ focused }) => (
-              <FontAwesome
-                name="archive"
-                size={18}
-                color={focused ? COLORS[theme].medium : COLORS[theme].secondary}
+              <Entypo
+                name="open-book"
+                size={20}
+                color={focused ? COLORS[theme].grey : COLORS[theme].secondary}
               />
             ),
           }}
         />
-        <Tabs.Screen name="breathing" options={{ title: "Breathing" }} />
+        <Tabs.Screen
+          name="charts"
+          options={{
+            title: "Charts",
+            headerShown: false,
+            tabBarIcon: ({ focused }) => (
+              <AntDesign
+                name="piechart"
+                size={20}
+                color={focused ? COLORS[theme].grey : COLORS[theme].secondary}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="breathing"
+          options={{
+            title: "Breathing",
+            headerShown: false,
+            unmountOnBlur: true,
+            tabBarIcon: ({ focused }) => (
+              <Entypo
+                name="heart"
+                size={20}
+                color={focused ? COLORS[theme].grey : COLORS[theme].secondary}
+              />
+            ),
+          }}
+        />
 
-        <Tabs.Screen name="settings" options={{ title: "Settings" }} />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: "Settings",
+            headerShown: false,
+            tabBarIcon: ({ focused }) => (
+              <Entypo
+                name="cog"
+                size={20}
+                color={focused ? COLORS[theme].grey : COLORS[theme].secondary}
+              />
+            ),
+          }}
+        />
       </Tabs>
       <StatusBar
         backgroundColor={COLORS[theme].backgroundColor}
