@@ -4,6 +4,7 @@ import Toast from "react-native-toast-message";
 import COLORS from "../../../constants/COLORS";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
+import { ToastConfig } from "../../../constants/ToastConfig";
 
 const GratitudeLayout = () => {
   return (
@@ -18,7 +19,7 @@ const GratitudeLayout = () => {
           gestureDirection: "vertical",
         }}
       />
-      <Toast />
+      <Toast config={ToastConfig} />
     </>
   );
 };

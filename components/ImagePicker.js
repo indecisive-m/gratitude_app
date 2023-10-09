@@ -1,9 +1,15 @@
-import { useState } from "react";
-import { Text, Pressable, Image } from "react-native";
+import { useState, useContext } from "react";
+import { Text, Pressable, Image, StyleSheet } from "react-native";
 import * as SelectImage from "expo-image-picker";
+import { ThemeContext } from "../context/Contexts";
+import COLORS from "../constants/COLORS";
 
 const ImagePicker = ({ handleImage }) => {
+  const { theme, setTheme } = useContext(ThemeContext);
+
   const [image, setImage] = useState(null);
+
+  const styles = styling(theme);
 
   const addImageText = !image ? "Add a photo?" : "Change selected photo";
   const pickImage = async () => {
@@ -22,20 +28,33 @@ const ImagePicker = ({ handleImage }) => {
 
   return (
     <>
-      <Pressable
-        style={{ backgroundColor: "red", padding: 10 }}
-        onPress={pickImage}
-      >
-        <Text>{addImageText}</Text>
+      <Pressable style={styles.button} onPress={pickImage}>
+        <Text style={styles.text}>{addImageText}</Text>
       </Pressable>
 
-      {image && (
-        <Image
-          source={{ uri: image }}
-          style={{ width: 200, height: 200, margin: 10 }}
-        />
-      )}
+      {image && <Image source={{ uri: image }} style={styles.image} />}
     </>
   );
 };
 export default ImagePicker;
+
+const styling = (theme) =>
+  StyleSheet.create({
+    button: {
+      padding: 10,
+      backgroundColor: COLORS[theme].grey,
+      borderRadius: 10,
+      marginVertical: 10,
+    },
+    text: {
+      color: COLORS[theme].primary,
+      fontSize: 16,
+    },
+    image: {
+      width: "100%",
+      height: 300,
+      marginBottom: 10,
+      borderRadius: 10,
+      alignSelf: "center",
+    },
+  });

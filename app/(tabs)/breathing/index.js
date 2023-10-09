@@ -148,7 +148,7 @@ const index = () => {
         ></Animated.View>
       </View>
       {button}
-      <Text style={styles.text}>{`${counter} / 10`}</Text>
+      <Text style={styles.counter}>{`${counter} / 10`}</Text>
       <StatusBar
         backgroundColor={COLORS[theme].backgroundColor}
         barStyle={"light-content"}
@@ -224,5 +224,10 @@ const styling = (theme, height, width) =>
       paddingHorizontal: 30,
       paddingVertical: 10,
       borderRadius: 10,
+    },
+    counter: {
+      fontSize: 16,
+      color: COLORS[theme].primary,
+      paddingTop: 10,
     },
   });

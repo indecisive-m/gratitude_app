@@ -14,7 +14,9 @@ const GratitudeInput = ({ handleGratitude, gratitude, name, defaultValue }) => {
       <TextInput
         style={styles.input}
         placeholder="I am grateful for..."
-        placeholderTextColor={theme === "dark" ? "#FFF" : "#000"}
+        placeholderTextColor={
+          theme === "dark" ? COLORS[theme].secondary : "#000"
+        }
         multiline={true}
         defaultValue={defaultValue}
         maxLength={200}
@@ -46,7 +48,7 @@ const styling = (theme) =>
       fontSize: 20,
       textAlignVertical: "top",
       backgroundColor: COLORS[theme].grey,
-      color: COLORS[theme].secondary,
+      color: COLORS[theme].primary,
     },
     counter: {
       fontSize: 10,
