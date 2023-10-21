@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Text,
   StatusBar,
+  TextComponent,
 } from "react-native";
 import { Stack } from "expo-router";
 import { useContext, useEffect, useLayoutEffect, useState } from "react";
@@ -18,16 +19,46 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Animated, { SlideInDown, Easing } from "react-native-reanimated";
 import { RefreshControl } from "react-native-gesture-handler";
 import { ThemeContext } from "../../../context/Contexts";
+import Database from "../../../constants/Database";
+import * as SQLite from "expo-sqlite";
+
 const index = () => {
   const [gratitude, setGratitude] = useState([]);
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [searchShown, setSearchShown] = useState(false);
+
+  const db = Database;
+
   const { theme, setTheme } = useContext(ThemeContext);
   const styles = styling(theme);
 
-  const removeStorage = async () => {
+  useEffect(() => {
+    createSQLiteTable();
+    getValuesFromSQLite();
+  }, []);
+
+  const createSQLiteTable = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS newGratitude (id integer primary key autoincrement, firstGratitude text, secondGratitude text, thirdGratitude text, mood text, imageURI text, date text)"
+      );
+    });
+  };
+
+  const getValuesFromSQLite = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM newGratitude",
+        null,
+        (txObj, resultSet) => setGratitude(resultSet.rows._array.reverse()),
+        (txObj, error) => console.log(error)
+      );
+    });
+  };
+
+  const deleteSelectedItem = () => {
     if (!selected) {
       Toast.show({
         type: "error",
@@ -37,40 +68,50 @@ const index = () => {
         visibilityTime: 1000,
       });
     } else {
-      try {
-        await AsyncStorage.removeItem(`${selected}`);
-        let list = [];
-        gratitude.map((item) => {
-          if (selected !== item.id) {
-            list.push(item);
+      db.transaction((tx) => {
+        tx.executeSql(
+          "DELETE FROM newGratitude WHERE id = ?",
+          [selected],
+          (txObj, resultSet) => {
+            let list = [];
+            gratitude.map((item) => {
+              if (selected !== item.id) {
+                list.push(item);
+              }
+            });
+
+            if (list.length === 0) {
+              setGratitude([]);
+            }
+
+            setGratitude(list);
+            setSelected("");
+
+            Toast.show({
+              type: "success",
+              text1: "Deleted",
+              position: "bottom",
+              autoHide: true,
+              visibilityTime: 1000,
+            });
           }
-        });
-
-        if (list.length === 0) {
-          setGratitude([]);
-        }
-
-        setGratitude(list);
-        setSelected("");
-
-        Toast.show({
-          type: "success",
-          text1: "Deleted",
-          position: "bottom",
-          autoHide: true,
-          visibilityTime: 1000,
-        });
-      } catch (e) {
-        console.log(e);
-      }
+        );
+      });
     }
   };
 
+  const clearStorage = async () => {
+    db.transaction((tx) => {
+      tx.executeSql("DELETE FROM newGratitude;"),
+        (txObj, resultSet) => setSelected(undefined);
+      setGratitude([]), (txObj, error) => console.log(error);
+    });
+  };
   const onRefresh = () => {
     setRefreshing(true);
-    setSelected("");
+    setSelected(undefined);
     if (!gratitude) {
-      getKeys();
+      getValuesFromSQLite();
     }
 
     setTimeout(() => {
@@ -80,49 +121,15 @@ const index = () => {
 
   const handleLongPress = (item) => {
     if (item.id === selected) {
-      setSelected("");
+      setSelected(undefined);
     } else {
       setSelected(item.id);
-    }
-  };
-
-  const clearStorage = async () => {
-    try {
-      await AsyncStorage.clear();
-      setGratitude([]);
-      setSelected("");
-    } catch (error) {
-      console.log("error");
-    }
-  };
-
-  const getKeys = async () => {
-    try {
-      setIsLoading(true);
-      let keyValues = [];
-
-      const keys = await AsyncStorage.getAllKeys();
-
-      for (const key of keys) {
-        const getKeyValues = await AsyncStorage.getItem(key);
-        keyValues.push(JSON.parse(getKeyValues));
-      }
-
-      setGratitude(keyValues.reverse());
-      setIsLoading(false);
-    } catch (error) {
-      console.log(error);
     }
   };
 
   const changeStyle = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
-
-  useEffect(() => {
-    getKeys();
-    // clearStorage();
-  }, []);
 
   if (isLoading) {
     return (
@@ -165,7 +172,7 @@ const index = () => {
           style={styles.iconContainer}
           entering={SlideInDown.duration(750).easing(Easing.elastic(0.75))}
         >
-          <Pressable onPress={removeStorage} style={styles.remove}>
+          <Pressable onPress={deleteSelectedItem} style={styles.remove}>
             <MaterialCommunityIcons
               name="delete"
               size={28}

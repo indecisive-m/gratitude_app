@@ -6,6 +6,7 @@ import {
   usePathname,
   useRouter,
 } from "expo-router";
+import * as SQLite from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState, useContext, useLayoutEffect } from "react";
 import { ScrollView, TextInput } from "react-native-gesture-handler";
@@ -16,12 +17,15 @@ import Toast from "react-native-toast-message";
 import ImagePicker from "../../../components/ImagePicker";
 import { ThemeContext } from "../../../context/Contexts";
 import GratitudeInput from "../../../components/GratitudeInput";
+import Database from "../../../constants/Database";
 
 const dailyinput = () => {
   const { theme, setTheme } = useContext(ThemeContext);
   const styles = styling(theme);
 
   const router = useRouter();
+
+  const db = Database;
 
   const [mood, setMood] = useState("");
 
@@ -33,26 +37,33 @@ const dailyinput = () => {
   const [showSecond, setShowSecond] = useState(false);
   const [showThird, setShowThird] = useState(false);
 
-  const storeData = async () => {
+  const storeData = () => {
     if (mood && firstGratitude) {
-      try {
-        const date = new Date();
+      const date = new Date();
+      const dateID = date.toISOString();
 
-        const id = date.toISOString();
-
-        const data = JSON.stringify({
-          firstGratitude,
-          secondGratitude,
-          thirdGratitude,
-          mood,
-          imageURI,
-          id,
-        });
-        await AsyncStorage.setItem(`${id}`, data);
-        router.replace((href = "/gratitudes"));
-      } catch (error) {
-        console.log(error);
-      }
+      db.transaction((tx) => {
+        tx.executeSql(
+          "INSERT INTO newGratitude (firstGratitude, secondGratitude, thirdGratitude, mood, imageURI, date) values (?, ?, ?, ?, ?, ?)",
+          [
+            firstGratitude,
+            secondGratitude,
+            thirdGratitude,
+            mood,
+            imageURI,
+            dateID,
+          ],
+          (txObj, resultSet) => {
+            setFirstGratitude("");
+            setSecondGratitude("");
+            setThirdGratitude("");
+            setImageURI("");
+            setMood("");
+            router.replace((href = "/gratitudes"));
+          },
+          (txObj, error) => console.log(error)
+        );
+      });
     } else {
       Toast.show({
         type: "error",

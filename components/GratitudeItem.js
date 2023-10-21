@@ -18,7 +18,7 @@ const GratitudeItem = ({ item, handleLongPress, selected }) => {
 
   const bulletPoint = "\u25AA";
 
-  const idDate = new Date(item.id);
+  const idDate = new Date(item.date);
 
   // TODO: figure out yesterday properly. As it stands it will not work on the first day of the month.
 
