@@ -7,7 +7,7 @@ import {
   ImageBackground,
   ActivityIndicator,
 } from "react-native";
-import { Link, Stack } from "expo-router";
+import { Link, Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, TextInput } from "react-native-gesture-handler";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -18,6 +18,7 @@ import { useContext } from "react";
 import { ThemeContext } from "../../../context/Contexts";
 import GratitudeInput from "../../../components/GratitudeInput";
 import * as SelectImage from "expo-image-picker";
+import Database from "../../../constants/Database";
 import Animated, {
   withTiming,
   useAnimatedStyle,
@@ -33,6 +34,8 @@ const edit = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { theme, setTheme } = useContext(ThemeContext);
   const styles = styling(theme);
+  const db = Database;
+  const router = useRouter();
 
   const { id } = useLocalSearchParams();
   const opacity = useSharedValue(1);
@@ -49,33 +52,34 @@ const edit = () => {
     };
   }, []);
 
-  const getItem = async () => {
-    const getItem = await AsyncStorage.getItem(id);
+  const getItem = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT firstGratitude, secondGratitude, thirdGratitude, mood, imageURI from newGratitudeList WHERE id = ?",
+        [id],
 
-    const { mood, firstGratitude, secondGratitude, thirdGratitude, imageURI } =
-      JSON.parse(getItem);
-
-    setMood(mood);
-    setFirstGratitude(firstGratitude);
-    setSecondGratitude(secondGratitude);
-    setThirdGratitude(thirdGratitude);
-    setImageURI(imageURI);
+        (txObj, resultSet) => {
+          let gratitudeList = resultSet.rows._array[0];
+          setFirstGratitude(gratitudeList.firstGratitude);
+          setSecondGratitude(gratitudeList.secondGratitude);
+          setThirdGratitude(gratitudeList.thirdGratitude);
+          setMood(gratitudeList.mood);
+          setImageURI(gratitudeList.imageURI);
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
   };
 
-  const storeData = async () => {
-    try {
-      const data = JSON.stringify({
-        firstGratitude,
-        secondGratitude,
-        thirdGratitude,
-        mood,
-        id,
-        imageURI,
-      });
-      await AsyncStorage.setItem(`${id}`, data);
-    } catch (error) {
-      console.log(error);
-    }
+  const storeData = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "UPDATE newGratitudeList SET firstGratitude = ?, secondGratitude = ?, thirdGratitude = ?, mood = ?, imageURI = ? WHERE id = ?",
+        [firstGratitude, secondGratitude, thirdGratitude, mood, imageURI, id],
+        (txObj, resultSet) => router.replace((href = "/gratitudes")),
+        (txObj, error) => console.log(error)
+      );
+    });
   };
 
   const handleFirstGratitude = (text) => {
@@ -102,6 +106,10 @@ const edit = () => {
     }
   };
 
+  const deleteImage = () => {
+    setImageURI(undefined);
+  };
+
   const animatedStyles = useAnimatedStyle(() => ({
     opacity: opacity.value,
   }));
@@ -116,7 +124,7 @@ const edit = () => {
     <>
       <ImageBackground source={{ uri: imageURI }} style={styles.image} />
       <Animated.Text style={[styles.imageText, animatedStyles]}>
-        Click image to change
+        Press image to change / long press to delete photo
       </Animated.Text>
     </>
   );
@@ -136,7 +144,9 @@ const edit = () => {
         options={{ title: "Edit Gratitude", animation: "slide_from_bottom" }}
       />
       <ScrollView contentContainerStyle={styles.container}>
-        <Pressable onPress={pickImage}>{showImage}</Pressable>
+        <Pressable onPress={pickImage} onLongPress={deleteImage}>
+          {showImage}
+        </Pressable>
         <View>
           <View style={styles.emojiWrapper}>
             <Pressable onPress={() => setMood("sad")}>

@@ -44,7 +44,7 @@ const dailyinput = () => {
 
       db.transaction((tx) => {
         tx.executeSql(
-          "INSERT INTO newGratitude (firstGratitude, secondGratitude, thirdGratitude, mood, imageURI, date) values (?, ?, ?, ?, ?, ?)",
+          "INSERT INTO newGratitudeList (firstGratitude, secondGratitude, thirdGratitude, mood, imageURI, date) values (?, ?, ?, ?, ?, ?)",
           [
             firstGratitude,
             secondGratitude,
@@ -59,7 +59,7 @@ const dailyinput = () => {
             setThirdGratitude("");
             setImageURI("");
             setMood("");
-            router.replace((href = "/gratitudes"));
+            router.replace((href = "/gratitudes/quote"));
           },
           (txObj, error) => console.log(error)
         );

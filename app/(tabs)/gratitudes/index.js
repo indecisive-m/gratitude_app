@@ -27,7 +27,7 @@ const index = () => {
   const [selected, setSelected] = useState(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [searchShown, setSearchShown] = useState(false);
+  const [toggleInput, setToggleInput] = useState(false);
 
   const db = Database;
 
@@ -42,17 +42,19 @@ const index = () => {
   const createSQLiteTable = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS newGratitude (id integer primary key autoincrement, firstGratitude text, secondGratitude text, thirdGratitude text, mood text, imageURI text, date text)"
-      );
+        "CREATE TABLE IF NOT EXISTS newGratitudeList (id integer primary key autoincrement, firstGratitude text, secondGratitude text, thirdGratitude text, mood text, imageURI text, date text)"
+      ),
+        (txObj, resultSet) => console.log("table successfully created"),
+        (txObj, error) => console.log(error);
     });
   };
 
   const getValuesFromSQLite = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM newGratitude",
+        "SELECT * FROM newGratitudeList ORDER BY id DESC",
         null,
-        (txObj, resultSet) => setGratitude(resultSet.rows._array.reverse()),
+        (txObj, resultSet) => setGratitude(resultSet.rows._array),
         (txObj, error) => console.log(error)
       );
     });
@@ -70,7 +72,7 @@ const index = () => {
     } else {
       db.transaction((tx) => {
         tx.executeSql(
-          "DELETE FROM newGratitude WHERE id = ?",
+          "DELETE FROM newGratitudeList WHERE id = ?",
           [selected],
           (txObj, resultSet) => {
             let list = [];
@@ -102,17 +104,17 @@ const index = () => {
 
   const clearStorage = async () => {
     db.transaction((tx) => {
-      tx.executeSql("DELETE FROM newGratitude;"),
+      tx.executeSql("DELETE FROM newGratitudeList;"),
         (txObj, resultSet) => setSelected(undefined);
       setGratitude([]), (txObj, error) => console.log(error);
     });
   };
+
   const onRefresh = () => {
     setRefreshing(true);
     setSelected(undefined);
-    if (!gratitude) {
-      getValuesFromSQLite();
-    }
+    setToggleInput(false);
+    getValuesFromSQLite();
 
     setTimeout(() => {
       setRefreshing(false);
@@ -127,8 +129,37 @@ const index = () => {
     }
   };
 
+  const handleSearch = (text) => {
+    const letter = text.toUpperCase();
+
+    if (letter === "") {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM newGratitudeList ORDER BY id DESC",
+          null,
+          (txObj, resultSet) => setGratitude(resultSet.rows._array.reverse()),
+
+          (txObj, error) => console.log(error)
+        );
+      });
+    }
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM newGratitudeList WHERE UPPER(firstGratitude) LIKE ? OR UPPER(secondGratitude)  LIKE ? OR UPPER(thirdGratitude) LIKE ? ORDER BY id",
+        [`%${letter}%`, `%${letter}%`, `%${letter}%`],
+        (txObj, resultSet) => setGratitude(resultSet.rows._array),
+        (txObj, error) => console.log(error)
+      );
+    });
+  };
+
   const changeStyle = () => {
     setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const searchBarShown = (e) => {
+    setToggleInput(e);
   };
 
   if (isLoading) {
@@ -148,7 +179,11 @@ const index = () => {
           // headerShown: false,
         }}
       />
-      <Header searchShown={searchShown} />
+      <Header
+        toggleInput={toggleInput}
+        searchBarShown={searchBarShown}
+        handleSearch={handleSearch}
+      />
       <Animated.FlatList
         data={gratitude}
         keyExtractor={gratitude.id}

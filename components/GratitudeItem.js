@@ -8,10 +8,6 @@ import { ThemeContext } from "../context/Contexts";
 const GratitudeItem = ({ item, handleLongPress, selected }) => {
   const { theme, setTheme } = useContext(ThemeContext);
 
-  const router = useRouter();
-
-  const navigation = useNavigation();
-
   const styles = styling(theme);
 
   const highlighted = selected === item.id;
@@ -20,9 +16,15 @@ const GratitudeItem = ({ item, handleLongPress, selected }) => {
 
   const idDate = new Date(item.date);
 
+  const itemDate = idDate.toLocaleDateString();
+
   // TODO: figure out yesterday properly. As it stands it will not work on the first day of the month.
 
-  const dateArray = new Date().toLocaleDateString().split("/");
+  const dateToday = new Date();
+
+  const dateString = dateToday.toLocaleDateString();
+
+  const dateArray = dateString.split("/");
 
   const subtractADay = dateArray[0] - 1;
 
@@ -31,11 +33,11 @@ const GratitudeItem = ({ item, handleLongPress, selected }) => {
   const yesterday = dateArray.join("/");
 
   const date =
-    idDate.toLocaleDateString() === new Date().toLocaleDateString()
+    itemDate === dateString
       ? "Today"
-      : idDate === yesterday
+      : itemDate === yesterday
       ? "Yesterday"
-      : idDate;
+      : itemDate;
 
   const moodColor =
     item.mood === "happy"

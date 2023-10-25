@@ -12,9 +12,8 @@ import Animated, {
 import { TextInput } from "react-native-gesture-handler";
 import { ThemeContext } from "../context/Contexts";
 
-const Header = ({ handleSearch }) => {
+const Header = ({ handleSearch, toggleInput, searchBarShown }) => {
   const [finished, setFinished] = useState(false);
-  const [toggleInput, setToggleInput] = useState(false);
   const opacity = useSharedValue(1);
   const width = useSharedValue("14%");
   const { theme, setTheme } = useContext(ThemeContext);
@@ -40,8 +39,12 @@ const Header = ({ handleSearch }) => {
   const nextAnimation = () => {
     setFinished(true),
       (width.value = withTiming("100%", { duration: 1000 }, () => {
-        runOnJS(setToggleInput)(true);
+        runOnJS(searchBar)(true);
       }));
+  };
+
+  const searchBar = () => {
+    searchBarShown(true);
   };
 
   return (
@@ -69,6 +72,7 @@ const Header = ({ handleSearch }) => {
             placeholder="Search"
             placeholderTextColor={COLORS.dark.secondary}
             onChangeText={(text) => handleSearch(text)}
+            autoFocus={true}
           />
         </>
       )}
