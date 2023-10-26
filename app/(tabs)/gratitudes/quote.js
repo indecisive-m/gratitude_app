@@ -35,7 +35,7 @@ const quoteScreen = () => {
   }, []);
 
   if (isLoading) {
-    return <ActivityIndicator size={"large"} />;
+    return <ActivityIndicator size={"large"} style={styles.container} />;
   }
 
   return (

@@ -10,7 +10,7 @@ const GratitudeItem = ({ item, handleLongPress, selected }) => {
 
   const styles = styling(theme);
 
-  const highlighted = selected === item.id;
+  const highlighted = selected.includes(item.id);
 
   const bulletPoint = "\u25AA";
 

@@ -24,11 +24,10 @@ import * as SQLite from "expo-sqlite";
 
 const index = () => {
   const [gratitude, setGratitude] = useState([]);
-  const [selected, setSelected] = useState(undefined);
+  const [selected, setSelected] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [toggleInput, setToggleInput] = useState(false);
-
   const db = Database;
 
   const { theme, setTheme } = useContext(ThemeContext);
@@ -61,7 +60,7 @@ const index = () => {
   };
 
   const deleteSelectedItem = () => {
-    if (!selected) {
+    if (selected.length === 0) {
       Toast.show({
         type: "error",
         text1: "Please select a day to delete",
@@ -72,12 +71,12 @@ const index = () => {
     } else {
       db.transaction((tx) => {
         tx.executeSql(
-          "DELETE FROM newGratitudeList WHERE id = ?",
-          [selected],
+          `DELETE FROM newGratitudeList WHERE id IN (${selected.join(", ")})`,
+          [],
           (txObj, resultSet) => {
             let list = [];
             gratitude.map((item) => {
-              if (selected !== item.id) {
+              if (!selected.includes(item.id)) {
                 list.push(item);
               }
             });
@@ -87,7 +86,7 @@ const index = () => {
             }
 
             setGratitude(list);
-            setSelected("");
+            setSelected([]);
 
             Toast.show({
               type: "success",
@@ -112,7 +111,7 @@ const index = () => {
 
   const onRefresh = () => {
     setRefreshing(true);
-    setSelected(undefined);
+    setSelected([]);
     setToggleInput(false);
     getValuesFromSQLite();
 
@@ -122,10 +121,11 @@ const index = () => {
   };
 
   const handleLongPress = (item) => {
-    if (item.id === selected) {
-      setSelected(undefined);
+    if (selected.includes(item.id)) {
+      const filtered = selected.filter((select) => item.id !== select);
+      setSelected(filtered);
     } else {
-      setSelected(item.id);
+      setSelected((prev) => [...prev, item.id]);
     }
   };
 
@@ -202,7 +202,7 @@ const index = () => {
           );
         }}
       />
-      {selected && (
+      {selected.length >= 1 && (
         <Animated.View
           style={styles.iconContainer}
           entering={SlideInDown.duration(750).easing(Easing.elastic(0.75))}
