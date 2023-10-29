@@ -106,73 +106,118 @@ const dailyinput = () => {
         }}
       />
       <ScrollView contentContainerStyle={styles.container}>
-        <View>
-          <Text style={styles.text}>How has your day been?</Text>
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerText}>How are you feeling today?</Text>
           <View style={styles.emojiWrapper}>
-            <Pressable onPress={() => setMood("sad")}>
+            <Pressable
+              onPress={() => setMood("sad")}
+              style={[
+                styles.emoji,
+                { borderColor: COLORS.mood.sad },
+                mood === "sad"
+                  ? { opacity: 1, backgroundColor: "#FFF" }
+                  : mood === ""
+                  ? { opacity: 0.7 }
+                  : { opacity: 0.2 },
+              ]}
+            >
               <MaterialCommunityIcons
                 name="emoticon-sad"
                 size={50}
                 color={COLORS.mood.sad}
-                style={mood === "sad" ? { opacity: 1 } : { opacity: 0.3 }}
               />
+              <Text style={[styles.emojiText, { color: COLORS.mood.sad }]}>
+                Sad
+              </Text>
             </Pressable>
-            <Pressable onPress={() => setMood("neutral")}>
+            <Pressable
+              onPress={() => setMood("neutral")}
+              style={[
+                styles.emoji,
+                { borderColor: COLORS.mood.neutral },
+                mood === "neutral"
+                  ? { opacity: 1, backgroundColor: "#FFF" }
+                  : mood === ""
+                  ? { opacity: 0.9 }
+                  : { opacity: 0.4 },
+              ]}
+            >
               <MaterialCommunityIcons
                 name="emoticon-neutral"
                 size={50}
                 color={COLORS.mood.neutral}
-                style={mood === "neutral" ? { opacity: 1 } : { opacity: 0.3 }}
               />
+              <Text style={[styles.emojiText, { color: COLORS.mood.neutral }]}>
+                Meh
+              </Text>
             </Pressable>
-            <Pressable onPress={() => setMood("happy")}>
+            <Pressable
+              onPress={() => setMood("happy")}
+              style={[
+                styles.emoji,
+                { borderColor: COLORS.mood.happy },
+                mood === "happy"
+                  ? { opacity: 1, backgroundColor: "#FFF" }
+                  : mood === ""
+                  ? { opacity: 0.7 }
+                  : { opacity: 0.3 },
+              ]}
+            >
               <MaterialCommunityIcons
                 name="emoticon-happy"
                 size={50}
                 color={COLORS.mood.happy}
-                style={mood === "happy" ? { opacity: 1 } : { opacity: 0.3 }}
               />
+              <Text style={[styles.emojiText, { color: COLORS.mood.happy }]}>
+                Happy
+              </Text>
             </Pressable>
           </View>
         </View>
-        <View>
-          <Text style={styles.text}>
-            What three things are you grateful for today?
-          </Text>
-        </View>
-        <GratitudeInput
-          name={"First Gratitude"}
-          handleGratitude={handleFirstGratitude}
-          gratitude={firstGratitude}
-        />
-
-        {showSecond && (
+        <View style={styles.inputContainer}>
+          <Text style={styles.text}>What are you grateful for today?</Text>
           <GratitudeInput
-            name={"Second Gratitude"}
-            handleGratitude={handleSecondGratitude}
-            gratitude={secondGratitude}
+            name={"First Gratitude"}
+            handleGratitude={handleFirstGratitude}
+            gratitude={firstGratitude}
+            optional={false}
           />
-        )}
 
-        {showThird && (
-          <GratitudeInput
-            name={"Third Gratitude"}
-            handleGratitude={handleThirdGratitude}
-            gratitude={thirdGratitude}
-          />
-        )}
-        <View>
-          <ImagePicker handleImage={handleImage} />
+          {showSecond && (
+            <GratitudeInput
+              name={"Second Gratitude"}
+              handleGratitude={handleSecondGratitude}
+              gratitude={secondGratitude}
+              optional={true}
+            />
+          )}
+
+          {showThird && (
+            <GratitudeInput
+              name={"Third Gratitude"}
+              handleGratitude={handleThirdGratitude}
+              gratitude={thirdGratitude}
+              optional={true}
+            />
+          )}
+          <View>
+            <ImagePicker handleImage={handleImage} />
+          </View>
+          <View style={styles.buttonContainer}>
+            <Pressable
+              style={styles.button}
+              onPress={storeData}
+              disabled={disabled ? true : false}
+            >
+              <Text style={styles.buttonText}>Submit</Text>
+            </Pressable>
+          </View>
         </View>
-
-        <Pressable
-          style={styles.button}
-          onPress={storeData}
-          disabled={disabled ? true : false}
-        >
-          <Text style={styles.buttonText}>Submit</Text>
-        </Pressable>
       </ScrollView>
+      <StatusBar
+        backgroundColor={COLORS[theme].light}
+        barStyle={"dark-content"}
+      />
     </View>
   );
 };
@@ -180,13 +225,30 @@ const dailyinput = () => {
 const styling = (theme) =>
   StyleSheet.create({
     container: {
-      padding: 20,
-      backgroundColor: COLORS[theme].backgroundColor,
+      // padding: 20,
+      backgroundColor: COLORS[theme].light,
       flexGrow: 1,
     },
+    headerContainer: {
+      backgroundColor: COLORS[theme].light,
+      padding: 20,
+    },
+    headerText: {
+      fontSize: 22,
+      paddingBottom: 20,
+      color: COLORS[theme].backgroundColor,
+    },
+    inputContainer: {
+      padding: 20,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      backgroundColor: COLORS.dark.backgroundColor,
+      flexGrow: 1,
+      position: "relative",
+    },
     text: {
-      fontSize: 24,
-      paddingBottom: 10,
+      fontSize: 22,
+      // paddingBottom: 10,
       color: COLORS[theme].secondary,
     },
     emojiWrapper: {
@@ -195,11 +257,24 @@ const styling = (theme) =>
       paddingBottom: 10,
     },
     emoji: {
-      borderRadius: 50,
+      borderRadius: 20,
+      borderWidth: 2,
+      padding: 10,
+      width: 100,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    emojiText: {
+      alignSelf: "center",
+      fontSize: 20,
     },
     buttonText: {
       fontSize: 24,
       color: COLORS[theme].grey,
+    },
+    buttonContainer: {
+      justifyContent: "flex-end",
+      flexGrow: 1,
     },
     button: {
       backgroundColor: COLORS[theme].primary,

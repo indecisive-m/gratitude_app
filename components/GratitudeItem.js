@@ -68,7 +68,7 @@ const GratitudeItem = ({ item, handleLongPress, selected }) => {
         asChild
       >
         <Pressable>
-          <View style={{ width: "65%" }}>
+          <View style={!item.imageURI ? { width: "100%" } : { width: "65%" }}>
             <Text
               style={[
                 styles.text,
