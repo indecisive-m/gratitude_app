@@ -1,21 +1,36 @@
 import { StyleSheet, Text, Pressable } from "react-native";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useContext } from "react";
 import COLORS from "../constants/COLORS";
 import { ThemeContext } from "../context/Contexts";
+import {
+  GestureDetector,
+  Directions,
+  Gesture,
+} from "react-native-gesture-handler";
+import { runOnJS } from "react-native-reanimated";
 
 const AddGratitude = () => {
   const { theme, setTheme } = useContext(ThemeContext);
 
   const styles = styling(theme);
+  const router = useRouter();
+
+  const swipe = Gesture.Fling()
+    .direction(Directions.LEFT)
+    .onEnd(() => {
+      runOnJS(router.push)("/gratitudes/dailyinput");
+    });
 
   return (
-    <Link href={{ pathname: "/(tabs)/gratitudes/dailyinput" }} asChild>
-      <Pressable style={styles.dailyContainer}>
-        <Text style={styles.dailyText}>What are you grateful for today?</Text>
-        <Text style={styles.clickText}>Press to add...</Text>
-      </Pressable>
-    </Link>
+    <GestureDetector gesture={swipe}>
+      <Link href={{ pathname: "/(tabs)/gratitudes/dailyinput" }} asChild>
+        <Pressable style={styles.dailyContainer}>
+          <Text style={styles.dailyText}>What are you grateful for today?</Text>
+          <Text style={styles.clickText}>Press to add...</Text>
+        </Pressable>
+      </Link>
+    </GestureDetector>
   );
 };
 

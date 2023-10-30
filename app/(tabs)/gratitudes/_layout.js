@@ -5,6 +5,7 @@ import COLORS from "../../../constants/COLORS";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
 import { ToastConfig } from "../../../constants/ToastConfig";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const GratitudeLayout = () => {
   return (
@@ -16,7 +17,7 @@ const GratitudeLayout = () => {
           animation: "none",
           // animationDuration: 500,
           gestureEnabled: true,
-          gestureDirection: "vertical",
+          gestureDirection: "horizontal",
         }}
       />
       <Toast config={ToastConfig} />

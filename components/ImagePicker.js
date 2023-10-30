@@ -13,6 +13,7 @@ const ImagePicker = ({ handleImage }) => {
   const styles = styling(theme);
 
   const addImageText = !image ? "Add a photo?" : "Change selected photo";
+
   const pickImage = async () => {
     let result = await SelectImage.launchImageLibraryAsync({
       mediaTypes: SelectImage.MediaTypeOptions.Images,

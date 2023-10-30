@@ -2,11 +2,18 @@ import { StyleSheet, Text, Pressable, View, Image } from "react-native";
 import { useContext } from "react";
 import COLORS from "../constants/COLORS";
 import { Link, useNavigation, useRouter } from "expo-router";
-import Animated, { Easing, FadeInLeft } from "react-native-reanimated";
+import Animated, { Easing, FadeInLeft, runOnJS } from "react-native-reanimated";
 import { ThemeContext } from "../context/Contexts";
+import {
+  Gesture,
+  GestureDetector,
+  Directions,
+} from "react-native-gesture-handler";
 
 const GratitudeItem = ({ item, handleLongPress, selected }) => {
   const { theme, setTheme } = useContext(ThemeContext);
+
+  const router = useRouter();
 
   const styles = styling(theme);
 
@@ -48,61 +55,72 @@ const GratitudeItem = ({ item, handleLongPress, selected }) => {
       ? COLORS.mood.sad
       : null;
 
+  const swipe = Gesture.Fling()
+    .direction(Directions.LEFT)
+    .onEnd(() => {
+      runOnJS(router.push)({
+        pathname: "/(tabs)/gratitudes/[edit]",
+        params: { id: item.id },
+      });
+    });
+
   return (
-    <Animated.View
-      entering={FadeInLeft.duration(1500)
-        .easing(Easing.elastic(1.2))
-        .withInitialValues({
-          transform: [{ translateX: -50 }],
-        })}
-    >
-      <Link
-        href={{
-          pathname: "/(tabs)/gratitudes/[edit]",
-          params: {
-            id: item.id,
-          },
-        }}
-        style={[styles.container, highlighted ? styles.highlighted : null]}
-        onLongPress={() => handleLongPress(item)}
-        asChild
+    <GestureDetector gesture={swipe}>
+      <Animated.View
+        entering={FadeInLeft.duration(1500)
+          .easing(Easing.elastic(1.2))
+          .withInitialValues({
+            transform: [{ translateX: -50 }],
+          })}
       >
-        <Pressable>
-          <View style={!item.imageURI ? { width: "100%" } : { width: "65%" }}>
-            <Text
-              style={[
-                styles.text,
-                styles.id,
-                highlighted ? styles.highlighted : null,
-              ]}
-            >
-              {date}
-            </Text>
-            <Text
-              style={[styles.text, highlighted ? styles.highlighted : null]}
-            >{`${bulletPoint} ${item.firstGratitude}`}</Text>
-            {item.secondGratitude && (
+        <Link
+          href={{
+            pathname: "/(tabs)/gratitudes/[edit]",
+            params: {
+              id: item.id,
+            },
+          }}
+          style={[styles.container, highlighted ? styles.highlighted : null]}
+          onLongPress={() => handleLongPress(item)}
+          asChild
+        >
+          <Pressable>
+            <View style={!item.imageURI ? { width: "100%" } : { width: "65%" }}>
+              <Text
+                style={[
+                  styles.text,
+                  styles.id,
+                  highlighted ? styles.highlighted : null,
+                ]}
+              >
+                {date}
+              </Text>
               <Text
                 style={[styles.text, highlighted ? styles.highlighted : null]}
-              >{`${bulletPoint} ${item.secondGratitude}`}</Text>
-            )}
-            {item.thirdGratitude && (
-              <Text
-                style={[styles.text, highlighted ? styles.highlighted : null]}
-              >{`${bulletPoint} ${item.thirdGratitude}`}</Text>
-            )}
-          </View>
-          <View style={{ width: "45%", paddingRight: 5 }}>
-            {item.imageURI && (
-              <Image source={{ uri: item.imageURI }} style={styles.image} />
-            )}
-          </View>
-          <View
-            style={[styles.moodStripe, { backgroundColor: moodColor }]}
-          ></View>
-        </Pressable>
-      </Link>
-    </Animated.View>
+              >{`${bulletPoint} ${item.firstGratitude}`}</Text>
+              {item.secondGratitude && (
+                <Text
+                  style={[styles.text, highlighted ? styles.highlighted : null]}
+                >{`${bulletPoint} ${item.secondGratitude}`}</Text>
+              )}
+              {item.thirdGratitude && (
+                <Text
+                  style={[styles.text, highlighted ? styles.highlighted : null]}
+                >{`${bulletPoint} ${item.thirdGratitude}`}</Text>
+              )}
+            </View>
+            <View style={{ width: "45%", paddingRight: 5 }}>
+              {item.imageURI && (
+                <Image source={{ uri: item.imageURI }} style={styles.image} />
+              )}
+            </View>
+            <View
+              style={[styles.moodStripe, { backgroundColor: moodColor }]}
+            ></View>
+          </Pressable>
+        </Link>
+      </Animated.View>
+    </GestureDetector>
   );
 };
 

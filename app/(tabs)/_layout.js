@@ -31,6 +31,7 @@ const HomeLayout = () => {
           tabBarItemStyle: {
             borderRadius: 5,
           },
+          gestureEnabled: "true",
         }}
       >
         <Tabs.Screen

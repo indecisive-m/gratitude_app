@@ -176,6 +176,9 @@ const index = () => {
       <Stack.Screen
         options={{
           title: "Daily Gratitude",
+          gestureEnabled: "true",
+          gestureDirection: "horizontal",
+
           // headerShown: false,
         }}
       />
